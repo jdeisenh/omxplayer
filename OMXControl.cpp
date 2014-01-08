@@ -211,6 +211,27 @@ int OMXControl::getEvent()
       }
     }
     return KeyConfig::ACTION_BLANK;
+  }
+  else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "OpenUri")) 
+  {
+    DBusError error;
+    dbus_error_init(&error);
+
+    char *offset;
+    dbus_message_get_args(m, &error, DBUS_TYPE_STRING, &offset, DBUS_TYPE_INVALID);
+    fprintf(stderr,"URI to open: %s\n", offset);
+    dbus_respond_ok(m);
+    return KeyConfig::ACTION_OPEN_URI;
+  }
+  else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "NextTrack")) 
+  {
+    dbus_respond_ok(m);
+    return KeyConfig::ACTION_NEXT_TRACK;
+  } 
+  else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "PreviousTrack")) 
+  {
+    dbus_respond_ok(m);
+    return KeyConfig::ACTION_PREV_TRACK;
   } 
   else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "PlaybackStatus")) 
   {

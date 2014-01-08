@@ -13,11 +13,13 @@ protected:
   DBusConnection *bus;
   OMXClock       *clock;
   OMXPlayerAudio *audio;
+  std::string    uri;
 public:
   OMXControl();
   ~OMXControl();
   void init(OMXClock *m_av_clock, OMXPlayerAudio *m_player_audio);
   int getEvent();
+  std::string getUri() const { return uri; }
   void dispatch();
 private:
   int dbus_connect();

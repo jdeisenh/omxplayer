@@ -821,7 +821,22 @@ int main(int argc, char *argv[])
     return 0;
   }
 
-  m_filename = argv[optind];
+  auto GetNextFilename = [argc,argv](int offset=1 )
+  {
+    static int currentArgIdx = optind;
+    currentArgIdx+=offset;
+    // Overflow
+    if (currentArgIdx>=argc)
+        currentArgIdx=optind;
+    // Underflow
+    if (currentArgIdx < optind)
+        currentArgIdx=argc-1;
+    return argv[currentArgIdx];
+    
+  };
+
+  m_filename = GetNextFilename(0);
+
 
   auto PrintFileNotFound = [](const std::string& path)
   {
@@ -1051,14 +1066,15 @@ int main(int argc, char *argv[])
 
     double now = m_av_clock->GetAbsoluteClock();
     bool update = false;
-    if (m_last_check_time == 0.0 || m_last_check_time + DVD_MSEC_TO_TIME(20) <= now) 
+    if (m_last_check_time == 0.0 || m_last_check_time + DVD_MSEC_TO_TIME(10) <= now) 
     {
       update = true;
       m_last_check_time = now;
     }
 
      if (update) {
-    switch(m_omxcontrol.getEvent())
+    int event=m_omxcontrol.getEvent();
+    switch(event)
     {
       case KeyConfig::ACTION_SHOW_INFO:
         m_tv_show_info = !m_tv_show_info;
@@ -1160,6 +1176,26 @@ int main(int argc, char *argv[])
           m_incr = -600.0;
         }
         break;
+      case KeyConfig::ACTION_NEXT_TRACK:
+      case KeyConfig::ACTION_PREV_TRACK:
+        // Hacked up channel switch
+        printf("Closing video\n"); // Event sometimes takes a while to arrive
+        m_player_video.Close();
+        m_omx_reader.Close();
+
+        m_filename = GetNextFilename((event==KeyConfig::ACTION_NEXT_TRACK?1:-1));
+        printf("Open Video\n"); // Event sometimes takes a while to arrive
+       if(!m_omx_reader.Open(m_filename.c_str(), m_dump_format, m_live))
+            goto do_exit;
+        printf("Now Open\n");
+        if(0)
+        if(m_has_video && !m_player_video.Open(m_hints_video, m_av_clock, DestRect, m_Deinterlace ? VS_DEINTERLACEMODE_FORCE:m_NoDeinterlace ? VS_DEINTERLACEMODE_OFF:VS_DEINTERLACEMODE_AUTO,
+                                     m_hdmi_clock_sync, m_thread_player, m_display_aspect, video_queue_size, video_fifo_size))
+            goto do_exit;
+        FlushStreams(startpts);
+        //printf("Cont4\n");
+        m_seek_flush=true;
+        break; // 
       case KeyConfig::ACTION_NEXT_CHAPTER:
         if(m_omx_reader.GetChapterCount() > 0)
         {
@@ -1171,6 +1207,9 @@ int main(int argc, char *argv[])
         {
           m_incr = 600.0;
         }
+        break;
+      case KeyConfig::ACTION_OPEN_URI:
+        printf("Open URI %s\n", m_omxcontrol.getUri().c_str());
         break;
       case KeyConfig::ACTION_PREVIOUS_SUBTITLE:
         if(m_has_subtitle)
@@ -1456,6 +1495,10 @@ int main(int argc, char *argv[])
         video_fifo_low = m_has_video && video_fifo < threshold;
         video_fifo_high = !m_has_video || (video_pts != DVD_NOPTS_VALUE && video_fifo > m_threshold);
       }
+      if(0)
+      printf( "Normal M:%.0f (A:%.0f V:%.0f) P:%d A:%.2f V:%.2f/T:%.2f (%d,%d,%d,%d) A:%d%% V:%d%% (%.2f,%.2f)\n", stamp, audio_pts, video_pts, m_av_clock->OMXIsPaused(), 
+        audio_pts == DVD_NOPTS_VALUE ? 0.0:audio_fifo, video_pts == DVD_NOPTS_VALUE ? 0.0:video_fifo, m_threshold, audio_fifo_low, video_fifo_low, audio_fifo_high, video_fifo_high,
+        m_player_audio.GetLevel(), m_player_video.GetLevel(), m_player_audio.GetDelay(), (float)m_player_audio.GetCacheTotal());
       CLog::Log(LOGDEBUG, "Normal M:%.0f (A:%.0f V:%.0f) P:%d A:%.2f V:%.2f/T:%.2f (%d,%d,%d,%d) A:%d%% V:%d%% (%.2f,%.2f)\n", stamp, audio_pts, video_pts, m_av_clock->OMXIsPaused(), 
         audio_pts == DVD_NOPTS_VALUE ? 0.0:audio_fifo, video_pts == DVD_NOPTS_VALUE ? 0.0:video_fifo, m_threshold, audio_fifo_low, video_fifo_low, audio_fifo_high, video_fifo_high,
         m_player_audio.GetLevel(), m_player_video.GetLevel(), m_player_audio.GetDelay(), (float)m_player_audio.GetCacheTotal());

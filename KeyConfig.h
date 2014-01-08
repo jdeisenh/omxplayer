@@ -30,6 +30,9 @@ class KeyConfig
         ACTION_SEEK_BACK_LARGE,
         ACTION_SEEK_FORWARD_LARGE,
         ACTION_STEP,
+        ACTION_NEXT_TRACK,
+        ACTION_PREV_TRACK,
+	ACTION_OPEN_URI,
         ACTION_BLANK
     };
 

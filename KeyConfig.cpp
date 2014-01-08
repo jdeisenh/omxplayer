@@ -58,6 +58,10 @@ int convertStringToAction(string str_action)
         return KeyConfig::ACTION_SEEK_FORWARD_LARGE;
     if(str_action == "STEP")
         return KeyConfig::ACTION_STEP;
+    if(str_action == "NEXT_TRACK")
+        return KeyConfig::ACTION_NEXT_TRACK;
+    if(str_action == "PREV_TRACK")
+        return KeyConfig::ACTION_PREV_TRACK;
             
     return -1;
 }
@@ -122,6 +126,8 @@ map<int, int> KeyConfig::buildDefaultKeymap()
     keymap[KEY_DOWN] = ACTION_SEEK_BACK_LARGE;
     keymap[KEY_UP] = ACTION_SEEK_FORWARD_LARGE;
     keymap['v'] = ACTION_STEP;
+    keymap['t'] = ACTION_NEXT_TRACK;
+    keymap['g'] = ACTION_PREV_TRACK;
 
     return keymap;
 }
