@@ -110,6 +110,7 @@ int OMXControl::getEvent()
 
   if (m == NULL) 
     return KeyConfig::ACTION_BLANK;
+
   if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_ROOT, "Quit")) 
   {
     dbus_respond_ok(m);
@@ -130,6 +131,7 @@ int OMXControl::getEvent()
   } 
   else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Identity")) 
   {
+    printf("Message2\n");
     dbus_respond_string(m, "OMXPlayer");
     return KeyConfig::ACTION_BLANK;
   } 
@@ -219,7 +221,13 @@ int OMXControl::getEvent()
 
     char *offset;
     dbus_message_get_args(m, &error, DBUS_TYPE_STRING, &offset, DBUS_TYPE_INVALID);
-    fprintf(stderr,"URI to open: %s\n", offset);
+    if (dbus_error_is_set(&error)) 
+    {
+          dbus_error_free(&error);
+          dbus_respond_ok(m);
+          return KeyConfig::ACTION_BLANK;
+    } 
+    uri = offset;
     dbus_respond_ok(m);
     return KeyConfig::ACTION_OPEN_URI;
   }
