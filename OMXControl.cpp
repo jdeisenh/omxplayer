@@ -131,7 +131,6 @@ int OMXControl::getEvent()
   } 
   else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Identity")) 
   {
-    printf("Message2\n");
     dbus_respond_string(m, "OMXPlayer");
     return KeyConfig::ACTION_BLANK;
   } 
@@ -267,15 +266,15 @@ int OMXControl::getEvent()
     if (dbus_error_is_set(&error)) 
     { // i.e. Get current volume
       dbus_error_free(&error);
-      long volume = audio->GetVolume(); // Volume in millibels
-      double r = pow(10, volume / 2000.0);
-      dbus_respond_double(m, r);
+      double volume = audio->GetVolume(); // Volume in millibels
+      //double r = pow(10, volume / 2000.0);
+      dbus_respond_double(m, volume);
       return KeyConfig::ACTION_BLANK;
     } 
     else 
     {
-      long volume = static_cast<long>(2000.0 * log10(vol));
-      audio->SetVolume(volume);
+      //long volume = static_cast<long>(2000.0 * log10(vol));
+      audio->SetVolume(vol);
       dbus_respond_ok(m);
       return KeyConfig::ACTION_BLANK;
     }
