@@ -14,6 +14,7 @@ protected:
   OMXClock       *clock;
   OMXPlayerAudio *audio;
   std::string    uri;
+  int getEventInternal();
 public:
   OMXControl();
   ~OMXControl();

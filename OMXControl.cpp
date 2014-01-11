@@ -41,8 +41,9 @@ void OMXControl::init(OMXClock *m_av_clock, OMXPlayerAudio *m_player_audio)
 }
 void OMXControl::dispatch() 
 {
-  if (bus)
-    dbus_connection_read_write_dispatch(bus, 0);
+  if (bus) {
+        dbus_connection_read_write(bus, 0);
+  }
 }
 
 int OMXControl::dbus_connect() 
@@ -104,8 +105,16 @@ int OMXControl::getEvent()
 {
   if (!bus)
     return KeyConfig::ACTION_BLANK;
-  
+
   dispatch();
+  int ret=getEventInternal();
+  dispatch();
+  return ret;
+}  
+
+int OMXControl::getEventInternal()
+{
+ 
   DBusMessage *m = dbus_connection_pop_message(bus);
 
   if (m == NULL) 
@@ -276,6 +285,7 @@ int OMXControl::getEvent()
       //long volume = static_cast<long>(2000.0 * log10(vol));
       audio->SetVolume(vol);
       dbus_respond_ok(m);
+
       return KeyConfig::ACTION_BLANK;
     }
   } 
