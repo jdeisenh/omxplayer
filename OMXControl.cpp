@@ -289,7 +289,8 @@ int OMXControl::getEventInternal()
       return KeyConfig::ACTION_BLANK;
     }
   } 
-  else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Time_In_Us")) 
+  else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Time_In_Us")
+           || dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Position")) 
   {
     long pos = clock->OMXMediaTime();
     dbus_respond_int64(m, pos);
