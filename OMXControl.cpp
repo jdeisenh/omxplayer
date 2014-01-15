@@ -289,6 +289,32 @@ int OMXControl::getEventInternal()
     dbus_respond_string(m, status);
     return KeyConfig::ACTION_BLANK;
   } 
+  // Made up Property, not port of the mpris Standard!
+  else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Metadata"))
+  {
+    // Return metadata about current track
+    DBusMessage *reply;
+
+    reply = dbus_message_new_method_return(m);
+
+    if (!reply)
+    {
+        CLog::Log(LOGWARNING, "Failed to allocate message");
+        return DBUS_HANDLER_RESULT_NEED_MEMORY;
+    }
+    
+
+    char* id2="mpris:length";
+    int64_t mediaLength=666;
+    dbus_message_append_args(reply, 
+                DBUS_TYPE_STRING, &id2, DBUS_TYPE_INT64, &mediaLength,
+                DBUS_TYPE_INVALID);
+    dbus_connection_send(bus, reply, NULL);
+    dbus_message_unref(reply);
+
+     return KeyConfig::ACTION_BLANK;
+  }
+
   else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Volume")) 
   {
     DBusError error;
