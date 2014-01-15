@@ -193,6 +193,7 @@ int OMXControl::getEventInternal()
     dbus_respond_ok(m);
     return KeyConfig::ACTION_EXIT;
   } 
+  // Argument should be a millisecond offset, but currently, its a constant
   else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "Seek")) 
   {
     DBusError error;
@@ -219,6 +220,30 @@ int OMXControl::getEventInternal()
       {
         return KeyConfig::ACTION_SEEK_FORWARD_SMALL;
       }
+    }
+    return KeyConfig::ACTION_BLANK;
+  }
+  else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "SetPosition")) 
+  {
+    DBusError error;
+    dbus_error_init(&error);
+
+    char* objectpath;
+    int64_t offset;
+    dbus_message_get_args(m, &error, DBUS_TYPE_OBJECT_PATH, &objectpath, DBUS_TYPE_INT64, &offset, DBUS_TYPE_INVALID);
+
+    // Make sure a value is sent for seeking
+    if (dbus_error_is_set(&error)) 
+    {
+          dbus_error_free(&error);
+          dbus_respond_ok(m);
+          return KeyConfig::ACTION_BLANK;
+    } 
+    else 
+    {
+      dbus_respond_ok(m);
+      position=offset;
+      return KeyConfig::ACTION_SEEK_POSITION;
     }
     return KeyConfig::ACTION_BLANK;
   }

@@ -530,6 +530,7 @@ int main(int argc, char *argv[])
   bool                  m_seek_flush          = false;
   std::string           m_filename;
   double                m_incr                = 0;
+  double                m_seekto              = 0;
   CRBP                  g_RBP;
   COMXCore              g_OMX;
   bool                  m_stats               = false;
@@ -1320,6 +1321,9 @@ int main(int argc, char *argv[])
       case KeyConfig::ACTION_SEEK_BACK_LARGE:
         if(m_omx_reader.CanSeek()) m_incr = -600.0;
         break;
+      case KeyConfig::ACTION_SEEK_POSITION:
+        if (m_omx_reader.CanSeek()) m_seekto = m_omxcontrol.getPosition();
+        break;
       case KeyConfig::ACTION_PAUSE:
         m_Pause = !m_Pause;
         if (m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_NORMAL && m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_PAUSE)
@@ -1369,7 +1373,8 @@ int main(int argc, char *argv[])
     }
     }
 
-    if(m_seek_flush || m_incr != 0)
+    // Seek
+    if(m_seek_flush || m_incr != 0 || m_seekto != 0)
     {
       double seek_pos     = 0;
       double pts          = 0;
@@ -1379,12 +1384,18 @@ int main(int argc, char *argv[])
 
       pts = m_av_clock->OMXMediaTime();
 
-      seek_pos = (pts ? pts / DVD_TIME_BASE : last_seek_pos) + m_incr;
+      if (m_incr) {
+        seek_pos = (pts ? pts / DVD_TIME_BASE : last_seek_pos) + m_incr;
+      }
+      else {
+        seek_pos = m_seekto;
+      }
       last_seek_pos = seek_pos;
 
       seek_pos *= 1000.0;
 
       m_incr = 0;
+      m_seekto = 0;
 
       if(m_omx_reader.SeekTime((int)seek_pos, m_incr < 0.0f, &startpts))
       {

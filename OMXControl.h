@@ -14,6 +14,7 @@ protected:
   OMXClock       *clock;
   OMXPlayerAudio *audio;
   std::string    uri;
+  int64_t        position;
   int getEventInternal();
 public:
   OMXControl();
@@ -21,6 +22,7 @@ public:
   void init(OMXClock *m_av_clock, OMXPlayerAudio *m_player_audio);
   int getEvent();
   std::string getUri() const { return uri; }
+  double getPosition() const { return (double)position/1e6; }
   void dispatch();
 private:
   int dbus_connect();
