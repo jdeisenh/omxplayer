@@ -92,7 +92,7 @@ std::string       m_font_path           = "/usr/share/fonts/truetype/freefont/Fr
 std::string       m_italic_font_path    = "/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf";
 bool              m_asked_for_font      = false;
 bool              m_asked_for_italic_font = false;
-float             m_font_size           = 0.055f;
+float             m_font_size           = 0.2f; //0.055f;
 bool              m_centered            = false;
 bool              m_ghost_box           = true;
 unsigned int      m_subtitle_lines      = 3;
@@ -944,7 +944,7 @@ int main(int argc, char *argv[])
 
   m_thread_player = true;
 
-  if(!m_omx_reader.Open(m_filename.c_str(), m_dump_format, m_live))
+  if(!m_omx_reader.Open(m_filename.c_str(), m_dump_format, false))
     goto do_exit;
 
   if(m_dump_format)
@@ -1207,6 +1207,7 @@ int main(int argc, char *argv[])
         break;
       case KeyConfig::ACTION_NEXT_TRACK:
       case KeyConfig::ACTION_PREV_TRACK:
+         DISPLAY_TEXT_LONG("Channel switch");
         // Hacked up channel switch
         printf("Closing video\n"); // Event sometimes takes a while to arrive
         m_omx_reader.Close();
@@ -1419,19 +1420,17 @@ int main(int argc, char *argv[])
 
       m_incr = 0;
       m_seekto = 0;
-
       if(m_omx_reader.SeekTime((int)seek_pos, m_incr < 0.0f, &startpts))
       {
         unsigned t = (unsigned)(startpts*1e-6);
         auto dur = m_omx_reader.GetStreamLength() / 1000;
 
-        DISPLAY_TEXT_LONG(strprintf("Seek\n%02d:%02d:%02d / %02d:%02d:%02d",
+        if (0) DISPLAY_TEXT_LONG(strprintf("Seek\n%02d:%02d:%02d / %02d:%02d:%02d",
             (t/3600), (t/60)%60, t%60, (dur/3600), (dur/60)%60, dur%60));
         printf("Seek to: %02d:%02d:%02d\n", (t/3600), (t/60)%60, t%60);
 
         FlushStreams(startpts);
       }
-
       m_player_video.Close();
 
       sentStarted = false;
@@ -1555,7 +1554,7 @@ int main(int argc, char *argv[])
         m_player_audio.GetLevel(), m_player_video.GetLevel(), m_player_audio.GetDelay(), (float)m_player_audio.GetCacheTotal());
 
       // keep latency under control by adjusting clock (and so resampling audio)
-      if (m_live)
+      if (false) //m_live)
       {
         float latency = DVD_NOPTS_VALUE;
         if (m_has_audio && audio_pts != DVD_NOPTS_VALUE)
