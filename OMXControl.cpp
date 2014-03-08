@@ -183,6 +183,11 @@ int OMXControl::getEventInternal()
     dbus_respond_ok(m);
     return KeyConfig::ACTION_PAUSE;
   } 
+  else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "Play")) 
+  {
+    dbus_respond_ok(m);
+    return KeyConfig::ACTION_RESUME;
+  } 
   else if (dbus_message_is_method_call(m, OMXPLAYER_DBUS_INTERFACE_PLAYER, "PlayPause")) 
   {
     dbus_respond_ok(m);
@@ -343,7 +348,7 @@ int OMXControl::getEventInternal()
   else if (dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Time_In_Us")
            || dbus_message_is_method_call(m, DBUS_INTERFACE_PROPERTIES, "Position")) 
   {
-    long pos = clock->OMXMediaTime();
+    int64_t pos = clock->OMXMediaTime();
     dbus_respond_int64(m, pos);
     return KeyConfig::ACTION_BLANK;
   } 

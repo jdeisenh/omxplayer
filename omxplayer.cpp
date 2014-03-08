@@ -1348,17 +1348,9 @@ int main(int argc, char *argv[])
       case KeyConfig::ACTION_SEEK_POSITION:
         if (m_omx_reader.CanSeek()) m_seekto = m_omxcontrol.getPosition();
         break;
-      case KeyConfig::ACTION_PAUSE:
-        m_Pause = !m_Pause;
-        if (m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_NORMAL && m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_PAUSE)
+      case KeyConfig::ACTION_PAUSE: 
         {
-          printf("resume\n");
-          playspeed_current = playspeed_normal;
-          SetSpeed(playspeeds[playspeed_current]);
-          m_seek_flush = true;
-        }
-        if(m_Pause)
-        {
+         m_Pause = true; 
           if(m_has_subtitle)
             m_player_subtitles.Pause();
 
@@ -1367,15 +1359,24 @@ int main(int argc, char *argv[])
           DISPLAY_TEXT_LONG(strprintf("Pause\n%02d:%02d:%02d / %02d:%02d:%02d",
             (t/3600), (t/60)%60, t%60, (dur/3600), (dur/60)%60, dur%60));
         }
-        else
+        break;
+      case KeyConfig::ACTION_RESUME:
         {
-          if(m_has_subtitle)
-            m_player_subtitles.Resume();
+            m_Pause = false;
+            if (m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_NORMAL && m_av_clock->OMXPlaySpeed() != DVD_PLAYSPEED_PAUSE)
+            {
+              printf("resume\n");
+              playspeed_current = playspeed_normal;
+              SetSpeed(playspeeds[playspeed_current]);
+              m_seek_flush = true;
+            }
+              if(m_has_subtitle)
+                m_player_subtitles.Resume();
 
-          auto t = (unsigned) (m_av_clock->OMXMediaTime()*1e-6);
-          auto dur = m_omx_reader.GetStreamLength() / 1000;
-          DISPLAY_TEXT_SHORT(strprintf("Play\n%02d:%02d:%02d / %02d:%02d:%02d",
-            (t/3600), (t/60)%60, t%60, (dur/3600), (dur/60)%60, dur%60));
+              auto t = (unsigned) (m_av_clock->OMXMediaTime()*1e-6);
+              auto dur = m_omx_reader.GetStreamLength() / 1000;
+              DISPLAY_TEXT_SHORT(strprintf("Play\n%02d:%02d:%02d / %02d:%02d:%02d",
+                (t/3600), (t/60)%60, t%60, (dur/3600), (dur/60)%60, dur%60));
         }
         break;
       case KeyConfig::ACTION_DECREASE_VOLUME:
